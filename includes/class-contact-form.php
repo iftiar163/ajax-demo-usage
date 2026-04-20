@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 class AJDM_Contact_Form{
     function __construct()
     {
@@ -69,6 +73,7 @@ class AJDM_Contact_Form{
 
     function process_submission(){
         // Nonce Varification Pending
+        check_ajax_referer('contact', 'nonce');
         $name = sanitize_text_field($_POST['name']);
         $email = sanitize_email($_POST['email']);
         $message = sanitize_textarea_field($_POST['message']);
@@ -77,16 +82,45 @@ class AJDM_Contact_Form{
             wp_send_json_error('All fields are required.');
         }
 
-        $to = get_option('admin_email');
+        // $to = get_option('admin_email');
+        $ip = $this -> get_the_user_ip();
         $subject = 'COntact Form submission Form' . $name;
-        $body = "Name : $name\nEmail : $email\nMessage: $message";
-        $headers = ['Content-Type: text/plain; charset=UTF-8'];
+        $body = "Name: $name\nEmail: $email\nSubject: $subject\nMessage: $message\nIP: $ip";
+        // $headers = ['Content-Type: text/plain; charset=UTF-8'];
 
-        if (wp_mail($to, $subject, $body, $headers)) {
+        // if (wp_mail($to, $subject, $body, $headers)) {
+        //     wp_send_json_success('Message Sent Successfully');
+        // } else {
+        //     wp_send_json_error('Failed');
+        // }
+
+        $post_data = [
+            'post_title' => "Submission From {$name}",
+            'post_content' => $body,
+            'post_status' => 'private',
+            'post_type' => 'contact_submission'
+        ];
+
+        $post_id = wp_insert_post($post_data);
+        if($post_id){
+            update_post_meta($post_id, 'submitter_name', $name);
+            update_post_meta($post_id, 'submitter_email', $email);
+            update_post_meta($post_id, 'submitter_ip', $ip);
             wp_send_json_success('Message Sent Successfully');
-        } else {
+        }else {
             wp_send_json_error('Failed');
         }
 
+    }
+
+    private function get_the_user_ip() {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
     }
 }

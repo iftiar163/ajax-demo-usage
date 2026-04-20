@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function(){
             document.getElementById('ajax-demo-currency-result').innerHTML = "Fetching Current Rates.....";
             const formData = new FormData();
             formData.append('action', 'currency')
+            formData.append('nonce',ajdm.currencyNonce)
             const response = await fetch(ajdm.ajax_url, {
                 method : "POST",
                 body : formData
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function(){
             e.preventDefault();
             const formData = new FormData(this)
             formData.append('action', 'contact')
+            formData.append('nonce', ajdm.contactNonce)
             const response = await fetch(ajdm.ajax_url, {
                 method: 'POST',
                 body: formData

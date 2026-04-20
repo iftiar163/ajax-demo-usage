@@ -35,18 +35,26 @@ class Ajax_Demo {
         require_once(AJDM_PLUGIN_DIR . "includes/class-shortcode-button.php");
         require_once(AJDM_PLUGIN_DIR . "includes/class-currency-widget.php");
         require_once(AJDM_PLUGIN_DIR . "includes/class-contact-form.php");
+        require_once(AJDM_PLUGIN_DIR . "includes/class-cpt.php");
     }
 
     function init(){
         new Ajax_Demo_Shortcode_Button();
         new AJDM_Currency_Widget();
         new AJDM_Contact_Form();
+        new AJDM_Custom_Post_Type();
     }
 
     function load_assests(){
         wp_enqueue_script('ajdm-main', AJDM_PLUGIN_URL . "assets/js/ajax-demo.js", [], time(), true);
         $admin_ajax_url = admin_url('admin-ajax.php');
-        wp_localize_script('ajdm-main', 'ajdm', ['ajax_url' => $admin_ajax_url]);
+        $currencyNonce = wp_create_nonce('currency');
+        $contactNonce = wp_create_nonce('contact');
+        wp_localize_script('ajdm-main', 'ajdm', [
+            'ajax_url' => $admin_ajax_url,
+            'currencyNonce' => $currencyNonce,
+            'contactNonce' => $contactNonce
+            ]);
     }
 }
 

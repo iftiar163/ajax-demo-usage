@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 class AJDM_Currency_Widget{
     function __construct()
     {
@@ -41,6 +45,12 @@ class AJDM_Currency_Widget{
     }
 
     function get_currency_rates(){
+        check_ajax_referer('currency','nonce');
+        // $nonce = sanitize_term_field($_POST['nonce']);
+        // if(!wp_verify_nonce($nonce, 'currency')){
+        //     wp_send_json_error('nonce Verification Failed');
+        //     return;
+        // }
         $api_url = 'https://api.exchangerate-api.com/v4/latest/BDT';
         $response = wp_remote_get($api_url);
         if(!is_wp_error($response)){
